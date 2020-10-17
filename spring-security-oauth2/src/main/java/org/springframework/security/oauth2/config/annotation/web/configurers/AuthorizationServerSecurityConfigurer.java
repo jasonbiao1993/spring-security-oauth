@@ -57,6 +57,9 @@ import org.springframework.web.accept.HeaderContentNegotiationStrategy;
  * @author Rob Winch
  * @author Dave Syer
  * @since 2.0
+ *
+ *  授权节点的安全配置。 这里开启/oauth/tokenkey验证端口无权限访问（单点客户端启动时会调用该接口获取jwt的key，所以这里设置成无权限访问）
+ *  以及 /oauth/token配置支持allowFormAuthenticationForClients（url中有clientid和client_secret的会走ClientCredentialsTokenEndpointFilter）
  */
 @Deprecated
 public final class AuthorizationServerSecurityConfigurer extends
@@ -169,6 +172,7 @@ public final class AuthorizationServerSecurityConfigurer extends
 		}
 		if (authenticationProviders.isEmpty()) {
 			if (passwordEncoder != null) {
+				// 使用默认的授权服务提供者
 				builder.userDetailsService(new ClientDetailsUserDetailsService(clientDetailsService()))
 					.passwordEncoder(passwordEncoder());
 			} else {

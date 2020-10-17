@@ -9,6 +9,7 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
  * <p>
  * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
  *
+ * 资源服务token服务
  */
 @Deprecated
 public interface ResourceServerTokenServices {
@@ -20,6 +21,7 @@ public interface ResourceServerTokenServices {
 	 * @return The authentication for the access token.
 	 * @throws AuthenticationException If the access token is expired
 	 * @throws InvalidTokenException if the token isn't valid
+	 * 根据accessToken加载客户端信息
 	 */
 	OAuth2Authentication loadAuthentication(String accessToken) throws AuthenticationException, InvalidTokenException;
 
@@ -28,6 +30,7 @@ public interface ResourceServerTokenServices {
 	 * 
 	 * @param accessToken the token value
 	 * @return the full access token with client id etc.
+	 * 根据accessToken获取完整的访问令牌详细信息。
 	 */
 	OAuth2AccessToken readAccessToken(String accessToken);
 

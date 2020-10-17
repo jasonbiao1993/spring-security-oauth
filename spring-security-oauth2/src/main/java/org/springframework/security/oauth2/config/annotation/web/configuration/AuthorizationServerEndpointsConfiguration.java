@@ -88,6 +88,9 @@ public class AuthorizationServerEndpointsConfiguration {
 		endpoints.setClientDetailsService(clientDetailsService);
 	}
 
+	/**
+	 *  AuthorizationEndpoint 创建
+	 */
 	@Bean
 	public AuthorizationEndpoint authorizationEndpoint() throws Exception {
 		AuthorizationEndpoint authorizationEndpoint = new AuthorizationEndpoint();
@@ -105,6 +108,9 @@ public class AuthorizationServerEndpointsConfiguration {
 		return authorizationEndpoint;
 	}
 
+	/**
+	 * TokenEndpoint 创建
+	 */
 	@Bean
 	public TokenEndpoint tokenEndpoint() throws Exception {
 		TokenEndpoint tokenEndpoint = new TokenEndpoint();

@@ -36,7 +36,8 @@ import org.springframework.util.Assert;
  * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
  *
  * @author Dave Syer
- * 
+ *
+ * 用于资源服务认证
  */
 @Deprecated
 public class OAuth2AuthenticationManager implements AuthenticationManager, InitializingBean {
@@ -83,7 +84,11 @@ public class OAuth2AuthenticationManager implements AuthenticationManager, Initi
 		if (authentication == null) {
 			throw new InvalidTokenException("Invalid token (token not found)");
 		}
+
+		// 1、 从 authentication 中获取 token
 		String token = (String) authentication.getPrincipal();
+
+		// 2、 调用 tokenServices.loadAuthentication() 方法  通过 token 参数获取到 OAuth2Authentication 对象 ，这里的tokenServices 就是我们资源服务器配置的。
 		OAuth2Authentication auth = tokenServices.loadAuthentication(token);
 		if (auth == null) {
 			throw new InvalidTokenException("Invalid token: " + token);
@@ -94,6 +99,7 @@ public class OAuth2AuthenticationManager implements AuthenticationManager, Initi
 			throw new OAuth2AccessDeniedException("Invalid token does not contain resource id (" + resourceId + ")");
 		}
 
+		// 3、 检测客户端信息，由于我们采用授权服务器和资源服务器分离的设计，所以这个检测方法实际没有检测
 		checkClientDetails(auth);
 
 		if (authentication.getDetails() instanceof OAuth2AuthenticationDetails) {
@@ -104,6 +110,8 @@ public class OAuth2AuthenticationManager implements AuthenticationManager, Initi
 				details.setDecodedDetails(auth.getDetails());
 			}
 		}
+
+		// 4、 设置认证成功标识并返回
 		auth.setDetails(authentication.getDetails());
 		auth.setAuthenticated(true);
 		return auth;

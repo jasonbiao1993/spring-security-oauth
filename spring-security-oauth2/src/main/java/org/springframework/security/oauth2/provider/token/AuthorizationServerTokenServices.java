@@ -27,6 +27,8 @@ import org.springframework.security.oauth2.provider.TokenRequest;
  *
  * @author Ryan Heaton
  * @author Dave Syer
+ *
+ * 授权服务的token服务，用于对token的操作，通过扩展实现自定义token实现
  */
 @Deprecated
 public interface AuthorizationServerTokenServices {
@@ -36,6 +38,7 @@ public interface AuthorizationServerTokenServices {
 	 * @param authentication The credentials associated with the access token.
 	 * @return The access token.
 	 * @throws AuthenticationException If the credentials are inadequate.
+	 * 创建token
 	 */
 	OAuth2AccessToken createAccessToken(OAuth2Authentication authentication) throws AuthenticationException;
 
@@ -48,6 +51,7 @@ public interface AuthorizationServerTokenServices {
 	 * @param tokenRequest The incoming token request.
 	 * @return The (new) access token.
 	 * @throws AuthenticationException If the refresh token is invalid or expired.
+	 * 刷新token
 	 */
 	OAuth2AccessToken refreshAccessToken(String refreshToken, TokenRequest tokenRequest)
 			throws AuthenticationException;
@@ -58,6 +62,7 @@ public interface AuthorizationServerTokenServices {
 	 * @param authentication the authentication key for the access token
 	 * 
 	 * @return the access token or null if there was none
+	 * 获取token
 	 */
 	OAuth2AccessToken getAccessToken(OAuth2Authentication authentication);
 

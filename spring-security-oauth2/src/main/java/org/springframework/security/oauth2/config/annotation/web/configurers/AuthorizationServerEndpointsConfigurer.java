@@ -88,6 +88,8 @@ import org.springframework.web.servlet.HandlerInterceptor;
  * @author Rob Winch
  * @author Dave Syer
  * @since 2.0
+ *
+ * 配置 授权节点信息。这里主要配置 tokenStore
  */
 @Deprecated
 public final class AuthorizationServerEndpointsConfigurer {

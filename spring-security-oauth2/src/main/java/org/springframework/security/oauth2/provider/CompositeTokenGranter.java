@@ -26,7 +26,7 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
  * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
  *
  * @author Dave Syer
- * 
+ * TokenGranter的设计思路是使用CompositeTokenGranter管理一个List列表，每一种grantType对应一个具体的真正授权者
  */
 @Deprecated
 public class CompositeTokenGranter implements TokenGranter {

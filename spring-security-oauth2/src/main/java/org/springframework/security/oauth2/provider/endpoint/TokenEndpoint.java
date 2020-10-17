@@ -68,7 +68,7 @@ import java.util.Set;
  * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
  *
  * @author Dave Syer
- * 
+ *  用于服务访问令牌的请求。预设地址：/oauth/token
  */
 @FrameworkEndpoint
 @Deprecated
@@ -94,14 +94,17 @@ public class TokenEndpoint extends AbstractEndpoint {
 			Principal principal, @RequestParam Map<String, String> parameters)
 			throws HttpRequestMethodNotSupportedException {
 
+		// 1、 验证 用户信息 （正常情况下会经过 ClientCredentialsTokenEndpointFilter 过滤器认证后获取到用户信息 ）
 		if (!(principal instanceof Authentication)) {
 			throw new InsufficientAuthenticationException(
 					"There is no client authentication. Try adding an appropriate authentication filter.");
 		}
 
+		// 2、 通过 ClientDetailsService().loadClientByClientId() 获取系统配置客户端信息
 		String clientId = getClientId(principal);
 		ClientDetails authenticatedClient = getClientDetailsService().loadClientByClientId(clientId);
 
+		// 3、 通过客户端信息生成 TokenRequest 对象
 		TokenRequest tokenRequest = getOAuth2RequestFactory().createTokenRequest(parameters, authenticatedClient);
 
 		// Only validate client details if a client is authenticated during this request.
@@ -134,11 +137,13 @@ public class TokenEndpoint extends AbstractEndpoint {
 			tokenRequest.setScope(OAuth2Utils.parseParameterList(parameters.get(OAuth2Utils.SCOPE)));
 		}
 
+		// 4、 调用 TokenGranter.grant()方法生成 OAuth2AccessToken 对象（即token）
 		OAuth2AccessToken token = getTokenGranter().grant(tokenRequest.getGrantType(), tokenRequest);
 		if (token == null) {
 			throw new UnsupportedGrantTypeException("Unsupported grant type");
 		}
 
+		// 5、 返回token
 		return getResponse(token);
 	}
 

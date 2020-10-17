@@ -32,7 +32,10 @@ import org.springframework.security.web.authentication.preauth.PreAuthenticatedA
  * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
  *
  * @author Dave Syer
- * 
+ * 用于从不同地方获取token信息
+ * 1.在Header中携带
+ * 2.拼接在url中作为requestParam
+ * 3.在form表单中携带
  */
 @Deprecated
 public class BearerTokenExtractor implements TokenExtractor {

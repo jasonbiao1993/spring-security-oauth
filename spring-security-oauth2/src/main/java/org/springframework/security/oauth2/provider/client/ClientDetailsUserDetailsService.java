@@ -26,7 +26,8 @@ import org.springframework.security.oauth2.provider.NoSuchClientException;
  * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
  *
  * @author Dave Syer
- * 
+ *
+ * UserDetailsService子类，内部维护了 ClientDetailsService 。其 loadUserByUsername 方法重写后调用ClientDetailsService.loadClientByClientId（）。
  */
 @Deprecated
 public class ClientDetailsUserDetailsService implements UserDetailsService {

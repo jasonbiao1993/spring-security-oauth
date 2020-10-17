@@ -58,6 +58,8 @@ import org.springframework.util.Assert;
  * @author Ryan Heaton
  * @author Luke Taylor
  * @author Dave Syer
+ *
+ * 默认token服务
  */
 @Deprecated
 public class DefaultTokenServices implements AuthorizationServerTokenServices, ResourceServerTokenServices,
@@ -93,6 +95,9 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 	@Transactional
 	public OAuth2AccessToken createAccessToken(OAuth2Authentication authentication) throws AuthenticationException {
 
+		// 1、 通过 tokenStore 获取到之前存在的token 并判断是否为空、过期，不为空且未过期则直接返回原有存在的token
+		// （由于我们常用Jwt 所以这里是 JwtTokenStore ，且 existingAccessToken 永远为空，即每次请求获取token的值均不同，
+		// 这与RedisTokenStore 是有区别的）
 		OAuth2AccessToken existingAccessToken = tokenStore.getAccessToken(authentication);
 		OAuth2RefreshToken refreshToken = null;
 		if (existingAccessToken != null) {
@@ -118,6 +123,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 		// Clients might be holding existing refresh tokens, so we re-use it in
 		// the case that the old access token
 		// expired.
+		// 2、 调用 createRefreshToken 方法生成 refreshToken
 		if (refreshToken == null) {
 			refreshToken = createRefreshToken(authentication);
 		}
@@ -130,9 +136,11 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 			}
 		}
 
+		// 3、 调用  createAccessToken(authentication, refreshToken) 方法获取 token
 		OAuth2AccessToken accessToken = createAccessToken(authentication, refreshToken);
 		tokenStore.storeAccessToken(accessToken, authentication);
 		// In case it was modified
+		// 4、 重新覆盖原有的刷新token（原有的 refreshToken 为UUID 数据，覆盖为 jwtToken）
 		refreshToken = accessToken.getRefreshToken();
 		if (refreshToken != null) {
 			tokenStore.storeRefreshToken(refreshToken, authentication);
@@ -310,6 +318,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 	}
 
 	private OAuth2AccessToken createAccessToken(OAuth2Authentication authentication, OAuth2RefreshToken refreshToken) {
+		// 1、 通过 UUID 创建  DefaultOAuth2AccessToken  并设置上有效时长等信息
 		String tokenValue = new String(Base64.encodeBase64URLSafe(DEFAULT_TOKEN_GENERATOR.generateKey()),  US_ASCII);
 		DefaultOAuth2AccessToken token = new DefaultOAuth2AccessToken(tokenValue);
 		int validitySeconds = getAccessTokenValiditySeconds(authentication.getOAuth2Request());
@@ -319,6 +328,7 @@ public class DefaultTokenServices implements AuthorizationServerTokenServices, R
 		token.setRefreshToken(refreshToken);
 		token.setScope(authentication.getOAuth2Request().getScope());
 
+		// 2、 判断 是否存在 token增强器 accessTokenEnhancer ，存在则调用增强器增强方法
 		return accessTokenEnhancer != null ? accessTokenEnhancer.enhance(token, authentication) : token;
 	}
 

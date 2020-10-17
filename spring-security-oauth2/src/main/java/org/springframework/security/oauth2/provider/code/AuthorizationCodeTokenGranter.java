@@ -64,6 +64,7 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 	@Override
 	protected OAuth2Authentication getOAuth2Authentication(ClientDetails client, TokenRequest tokenRequest) {
 
+		// 1、 从TokenRequest 中 获取 code 码 、 回调url
 		Map<String, String> parameters = tokenRequest.getRequestParameters();
 		String authorizationCode = parameters.get("code");
 		String redirectUri = parameters.get(OAuth2Utils.REDIRECT_URI);
@@ -72,11 +73,13 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 			throw new InvalidRequestException("An authorization code must be supplied.");
 		}
 
+		// 2、 调用 authorizationCodeServices.consumeAuthorizationCode(authorizationCode) 方法通过 Code码 获取 OAuth2Authentication 对象
 		OAuth2Authentication storedAuth = authorizationCodeServices.consumeAuthorizationCode(authorizationCode);
 		if (storedAuth == null) {
 			throw new InvalidGrantException("Invalid authorization code: " + authorizationCode);
 		}
 
+		// 3、 从 OAuth2Authentication 对象中获取 OAuth2Request 对象并验证回调url、clientId
 		OAuth2Request pendingOAuth2Request = storedAuth.getOAuth2Request();
 		// https://jira.springsource.org/browse/SECOAUTH-333
 		// This might be null, if the authorization was done without the redirect_uri parameter
@@ -99,6 +102,7 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 		// in the pendingAuthorizationRequest. We do want to check that a secret is provided
 		// in the token request, but that happens elsewhere.
 
+		// 4、 创建一个全新的 OAuth2Request，并从OAuth2Authentication 中获取到 Authentication 对象
 		Map<String, String> combinedParameters = new HashMap<String, String>(pendingOAuth2Request
 				.getRequestParameters());
 		// Combine the parameters adding the new ones last so they override if there are any clashes
@@ -108,7 +112,8 @@ public class AuthorizationCodeTokenGranter extends AbstractTokenGranter {
 		OAuth2Request finalStoredOAuth2Request = pendingOAuth2Request.createOAuth2Request(combinedParameters);
 		
 		Authentication userAuth = storedAuth.getUserAuthentication();
-		
+
+		// 5、 创建一个全新的 OAuth2Authentication 对象
 		return new OAuth2Authentication(finalStoredOAuth2Request, userAuth);
 
 	}

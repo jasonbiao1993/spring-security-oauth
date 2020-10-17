@@ -57,6 +57,8 @@ import javax.servlet.http.HttpServletRequest;
  * @author Dave Syer
  * 
  * @since 2.0.0
+ *
+ * 资源服务器配置
  */
 @Deprecated
 public final class ResourceServerSecurityConfigurer extends
@@ -204,14 +206,20 @@ public final class ResourceServerSecurityConfigurer extends
 	@Override
 	public void configure(HttpSecurity http) throws Exception {
 
+		// 1、 创建 OAuth2AuthenticationManager  对象
 		AuthenticationManager oauthAuthenticationManager = oauthAuthenticationManager(http);
+		// 2、 创建 OAuth2AuthenticationProcessingFilter 过滤器
 		resourcesServerFilter = new OAuth2AuthenticationProcessingFilter();
+		// 3. 为OAuth2AuthenticationProcessingFilter提供固定的AuthenticationManager即OAuth2AuthenticationManager，
+		// 它并没有将OAuth2AuthenticationManager添加到spring的容器中，不然可能会影响spring security的普通认证流程（非oauth2请求），
+		// 只有被OAuth2AuthenticationProcessingFilter拦截到的oauth2相关请求才被特殊的身份认证器处理。
 		resourcesServerFilter.setAuthenticationEntryPoint(authenticationEntryPoint);
 		resourcesServerFilter.setAuthenticationManager(oauthAuthenticationManager);
 		if (eventPublisher != null) {
 			resourcesServerFilter.setAuthenticationEventPublisher(eventPublisher);
 		}
 		if (tokenExtractor != null) {
+			// 设置了TokenExtractor默认的实现—-BearerTokenExtractor
 			resourcesServerFilter.setTokenExtractor(tokenExtractor);
 		}
 		if (authenticationDetailsSource != null) {
@@ -225,6 +233,7 @@ public final class ResourceServerSecurityConfigurer extends
 			.authorizeRequests().expressionHandler(expressionHandler)
 		.and()
 			.addFilterBefore(resourcesServerFilter, AbstractPreAuthenticatedProcessingFilter.class)
+			//	相关的异常处理器，可以重写相关实现，达到自定义异常的目的
 			.exceptionHandling()
 				.accessDeniedHandler(accessDeniedHandler)
 				.authenticationEntryPoint(authenticationEntryPoint);

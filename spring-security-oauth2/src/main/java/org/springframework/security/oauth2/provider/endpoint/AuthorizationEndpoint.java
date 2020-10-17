@@ -93,7 +93,7 @@ import java.util.Set;
  *
  * @author Dave Syer
  * @author Vladimir Kryachko
- * 
+ * 用于服务授权请求。预设地址：/oauth/authorize
  */
 @FrameworkEndpoint
 @SessionAttributes({AuthorizationEndpoint.AUTHORIZATION_REQUEST_ATTR_NAME, AuthorizationEndpoint.ORIGINAL_AUTHORIZATION_REQUEST_ATTR_NAME})
@@ -134,6 +134,8 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 		// Pull out the authorization request first, using the OAuth2RequestFactory. All further logic should
 		// query off of the authorization request instead of referring back to the parameters map. The contents of the
 		// parameters map will be stored without change in the AuthorizationRequest object once it is created.
+
+		//  1、 通过 OAuth2RequestFactory 从 参数中获取信息创建 AuthorizationRequest 授权请求对象
 		AuthorizationRequest authorizationRequest = getOAuth2RequestFactory().createAuthorizationRequest(parameters);
 
 		Set<String> responseTypes = authorizationRequest.getResponseTypes();
@@ -148,15 +150,20 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 
 		try {
 
+			// 2、 判断  principal 是否 已授权 ： /oauth/authorize 设置为无权限访问 ，所以要判断，
+			// 如果 判断失败则抛出 InsufficientAuthenticationException （AuthenticationException 子类），
+			// 其异常会被 ExceptionTranslationFilter 处理 ，最终跳转到 登录页面，这也是为什么我们第一次去请求获取 授权码时会跳转到登陆界面的原因
 			if (!(principal instanceof Authentication) || !((Authentication) principal).isAuthenticated()) {
 				throw new InsufficientAuthenticationException(
 						"User must be authenticated with Spring Security before authorization can be completed.");
 			}
 
+			// 3、 通过 ClientDetailsService.loadClientByClientId() 获取到 ClientDetails 客户端信息
 			ClientDetails client = getClientDetailsService().loadClientByClientId(authorizationRequest.getClientId());
 
 			// The resolved redirect URI is either the redirect_uri from the parameters or the one from
 			// clientDetails. Either way we need to store it on the AuthorizationRequest.
+			// 4、 获取参数中的回调地址并且与系统配置的回调地址对比
 			String redirectUriParameter = authorizationRequest.getRequestParameters().get(OAuth2Utils.REDIRECT_URI);
 			String resolvedRedirect = redirectResolver.resolveRedirect(redirectUriParameter, client);
 			if (!StringUtils.hasText(resolvedRedirect)) {
@@ -167,6 +174,7 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 
 			// We intentionally only validate the parameters requested by the client (ignoring any data that may have
 			// been added to the request by the manager).
+			//  5、 验证 scope
 			oauth2RequestValidator.validateScope(authorizationRequest, client);
 
 			// Some systems may allow for approval decisions to be remembered or approved by default. Check for
@@ -178,11 +186,13 @@ public class AuthorizationEndpoint extends AbstractEndpoint {
 			authorizationRequest.setApproved(approved);
 
 			// Validation is all done, so we can check for auto approval...
+			//  6、 检测该客户端是否设置自动 授权（即 我们配置客户端时配置的 autoApprove(true)  ）
 			if (authorizationRequest.isApproved()) {
 				if (responseTypes.contains("token")) {
 					return getImplicitGrantResponse(authorizationRequest);
 				}
 				if (responseTypes.contains("code")) {
+					// 7 调用 getAuthorizationCodeResponse() 方法生成code码并回调到设置的回调地址
 					return new ModelAndView(getAuthorizationCodeResponse(authorizationRequest,
 							(Authentication) principal));
 				}

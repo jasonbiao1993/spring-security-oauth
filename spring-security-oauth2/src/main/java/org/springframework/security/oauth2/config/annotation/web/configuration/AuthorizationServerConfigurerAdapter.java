@@ -21,20 +21,31 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
  * <p>
  * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
  *
+ * oauth2 授权配置
+ *
  * @author Dave Syer
  *
  */
 @Deprecated
 public class AuthorizationServerConfigurerAdapter implements AuthorizationServerConfigurer {
 
+	/***
+	 * 配置AuthorizationServer安全认证的相关信息，创建ClientCredentialsTokenEndpointFilter核心过滤器
+	 */
 	@Override
 	public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
 	}
 
+	/**
+	 *  配置OAuth2的客户端相关信息
+	 */
 	@Override
 	public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
 	}
 
+	/**
+	 * 配置AuthorizationServerEndpointsConfigurer众多相关类，包括配置身份认证器，配置认证方式，TokenStore，TokenGranter，OAuth2RequestFactory
+	 */
 	@Override
 	public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
 	}

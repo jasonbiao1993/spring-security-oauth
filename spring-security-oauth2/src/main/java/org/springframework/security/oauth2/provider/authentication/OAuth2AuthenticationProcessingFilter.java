@@ -52,7 +52,7 @@ import org.springframework.util.Assert;
  * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
  *
  * @author Dave Syer
- * 
+ *  用于加载给定的认证访问令牌请求的认证
  */
 @Deprecated
 public class OAuth2AuthenticationProcessingFilter implements Filter, InitializingBean {
@@ -134,6 +134,7 @@ public class OAuth2AuthenticationProcessingFilter implements Filter, Initializin
 
 		try {
 
+			// 1、 调用 tokenExtractor.extract() 方法从请求中解析出token信息并存放到 authentication 的  principal 字段 中
 			Authentication authentication = tokenExtractor.extract(request);
 			
 			if (authentication == null) {
@@ -153,6 +154,7 @@ public class OAuth2AuthenticationProcessingFilter implements Filter, Initializin
 					AbstractAuthenticationToken needsDetails = (AbstractAuthenticationToken) authentication;
 					needsDetails.setDetails(authenticationDetailsSource.buildDetails(request));
 				}
+				// 2、 调用  authenticationManager.authenticate() 认证过程： 注意此时的  authenticationManager 是 OAuth2AuthenticationManager
 				Authentication authResult = authenticationManager.authenticate(authentication);
 
 				if (debug) {
@@ -160,6 +162,7 @@ public class OAuth2AuthenticationProcessingFilter implements Filter, Initializin
 				}
 
 				eventPublisher.publishAuthenticationSuccess(authResult);
+				// 将身份信息绑定到SecurityContextHolder中
 				SecurityContextHolder.getContext().setAuthentication(authResult);
 
 			}

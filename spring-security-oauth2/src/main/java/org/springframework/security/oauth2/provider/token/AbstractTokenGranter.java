@@ -38,10 +38,19 @@ public abstract class AbstractTokenGranter implements TokenGranter {
 	
 	protected final Log logger = LogFactory.getLog(getClass());
 
+	/**
+	 * 与token相关的service，重点
+	 */
 	private final AuthorizationServerTokenServices tokenServices;
 
+	/**
+	 * 与clientDetails相关的service，重点
+	 */
 	private final ClientDetailsService clientDetailsService;
-	
+
+	/**
+	 * 创建oauth2Request的工厂，重点
+	 */
 	private final OAuth2RequestFactory requestFactory;
 	
 	private final String grantType;
@@ -56,10 +65,12 @@ public abstract class AbstractTokenGranter implements TokenGranter {
 
 	public OAuth2AccessToken grant(String grantType, TokenRequest tokenRequest) {
 
+		// 1、 判断 grantType 是否匹配
 		if (!this.grantType.equals(grantType)) {
 			return null;
 		}
-		
+
+		// 2、 获取  ClientDetails 信息 并验证 grantType
 		String clientId = tokenRequest.getClientId();
 		ClientDetails client = clientDetailsService.loadClientByClientId(clientId);
 		validateGrantType(grantType, client);
@@ -68,11 +79,13 @@ public abstract class AbstractTokenGranter implements TokenGranter {
 			logger.debug("Getting access token for: " + clientId);
 		}
 
+		// 3、 调用 getAccessToken() 方法生成token并返回
 		return getAccessToken(client, tokenRequest);
 
 	}
 
 	protected OAuth2AccessToken getAccessToken(ClientDetails client, TokenRequest tokenRequest) {
+		// 通过token服务，保存token对象
 		return tokenServices.createAccessToken(getOAuth2Authentication(client, tokenRequest));
 	}
 

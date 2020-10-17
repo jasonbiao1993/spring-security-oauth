@@ -41,7 +41,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
  * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
  *
  * @author Dave Syer
- * 
+ * 使能资源服务
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

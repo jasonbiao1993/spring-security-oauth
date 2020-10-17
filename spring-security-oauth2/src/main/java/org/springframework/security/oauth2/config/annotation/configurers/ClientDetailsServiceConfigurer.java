@@ -28,7 +28,7 @@ import org.springframework.security.oauth2.provider.ClientDetailsService;
  * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
  *
  * @author Rob Winch
- * 
+ *  配置客户端信息。 可以采用内存方式、JDBC方式等等，我们还可以像UserDetailsService一样定制ClientDetailsService。
  */
 @Deprecated
 public class ClientDetailsServiceConfigurer extends

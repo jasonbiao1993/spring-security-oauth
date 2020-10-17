@@ -34,6 +34,7 @@ public interface ClientDetailsService {
    * @param clientId The client id.
    * @return The client details (never null).
    * @throws ClientRegistrationException If the client account is locked, expired, disabled, or invalid for any other reason.
+   * 通过clientId查询获取Client信息
    */
   ClientDetails loadClientByClientId(String clientId) throws ClientRegistrationException;
 

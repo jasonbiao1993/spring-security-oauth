@@ -43,7 +43,9 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
  * @deprecated See the <a href="https://github.com/spring-projects/spring-security/wiki/OAuth-2.0-Migration-Guide">OAuth 2.0 Migration Guide</a> for Spring Security 5.
  *
  * @author Dave Syer
- * 
+ * 客户端凭据令牌端点过滤器
+ * 通过拦截 /oauth/token 地址，获取到 clientId 和 clientSecret 信息并创建 UsernamePasswordAuthenticationToken
+ * 作为 AuthenticationManager.authenticate() 参数 调用认证过程, 实际通过ProviderManager中DaoAuthenticationProvider处理
  */
 @Deprecated
 public class ClientCredentialsTokenEndpointFilter extends AbstractAuthenticationProcessingFilter {
